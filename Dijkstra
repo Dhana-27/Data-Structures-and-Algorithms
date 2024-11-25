@@ -65,7 +65,6 @@ int mi=999;
 int i,t;
 for(i=1;i<=k;i++)
 {
-71
 if(m[i]!=1)
 {
 if(mi>=a[i])
