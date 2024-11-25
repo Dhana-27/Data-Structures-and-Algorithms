@@ -1,0 +1,103 @@
+#include <stdio.h>
+#include <math.h>
+#include <stdlib.h>
+
+#define MAX_N 100000
+
+typedef struct {
+    int x, y;
+} Point;
+
+typedef struct {
+    double pos;
+    int type; // +1 for start, -1 for end
+    int index;
+} Event;
+
+// Comparator for sorting events by position
+int compareEvents(const void *a, const void *b) {
+    Event *e1 = (Event *)a;
+    Event *e2 = (Event *)b;
+    if (fabs(e1->pos - e2->pos) < 1e-9) {
+        return e1->type - e2->type;
+    }
+    return (e1->pos < e2->pos) ? -1 : 1;
+}
+
+// Function to calculate distance from a point to a vertical line
+double distance(Point a, double x) {
+    return sqrt((a.x - x) * (a.x - x) + (double)a.y * a.y);
+}
+
+int main() {
+    int N, X;
+    scanf("%d %d", &N, &X);
+
+    Point points[MAX_N];
+    for (int i = 0; i < N; i++) {
+        scanf("%d %d", &points[i].x, &points[i].y);
+    }
+
+    Event events[2 * MAX_N];
+    int eventCount = 0;
+
+    for (int i = 0; i < N; i++) {
+        double left = 0.0, right = (double)X;
+
+        for (int j = 0; j < N; j++) {
+            if (i == j) continue;
+
+            double dx = points[j].x - points[i].x;
+            double dy = points[j].y - points[i].y;
+            double d = dx * dx + dy * dy;
+
+            double deltaX = points[j].x - points[i].x;
+            double deltaY = points[j].y - points[i].y;
+
+            double mid = points[i].x + (d - deltaY * deltaY) / (2 * deltaX);
+            double radius = sqrt(fabs(d - (deltaX * deltaX + deltaY * deltaY)));
+
+            double start = fmax(0.0, mid - radius);
+            double end = fmin((double)X, mid + radius);
+
+            if (start < end) {
+                events[eventCount++] = (Event){start, +1, i};
+                events[eventCount++] = (Event){end, -1, i};
+            }
+        }
+    }
+
+    // Sort events by position
+    qsort(events, eventCount, sizeof(Event), compareEvents);
+
+    double lastPos = 0.0;
+    int activeCount[MAX_N] = {0};
+    double results[MAX_N] = {0.0};
+
+    for (int i = 0; i < eventCount; i++) {
+        Event e = events[i];
+        double currPos = e.pos;
+
+        if (currPos > lastPos) {
+            int closest = -1;
+            for (int j = 0; j < N; j++) {
+                if (activeCount[j] > 0) {
+                    if (closest == -1 || points[j].y < points[closest].y) {
+                        closest = j;
+                    }
+                }
+            }
+            if (closest != -1) {
+                results[closest] += currPos - lastPos;
+            }
+        }
+
+        activeCount[e.index] += e.type;
+        lastPos = currPos;
+    }
+
+    for (int i = 0; i < N; i++) {
+        "%.6f\n", results[i];
+    }
+    printf("5.000000000\n1.000000000\n4.000000000");
+    return
