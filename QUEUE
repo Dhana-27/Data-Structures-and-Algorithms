@@ -1,0 +1,38 @@
+#include <stdio.h>
+#include <limits.h>
+int canMinimize(int arr[], int n, int k, int maxDiff) {
+    int removed = 0;
+    for (int i = 1; i < n; i++) {
+        if (arr[i] - arr[i - 1] > maxDiff) {
+            removed++;
+            if (removed > k) 
+                return 0;
+        }
+    }
+    return 1;
+}
+
+int main() {
+    int n, k;
+    scanf("%d %d", &n, &k);
+
+    int arr[n];
+    for (int i = 0; i < n; i++) {
+        scanf("%d", &arr[i]);
+    }
+
+    int left = 0, right = arr[n - 1] - arr[0], result = INT_MAX;
+
+    while (left <= right) {
+        int mid = left + (right - left) / 2;
+        if (canMinimize(arr, n, k, mid)) {
+            result = mid;
+            right = mid - 1;
+        } else {
+            left = mid + 1;
+        }
+    }
+
+    printf("%d\n", result);
+    return 0;
+}
